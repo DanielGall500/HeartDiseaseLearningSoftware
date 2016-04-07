@@ -43,8 +43,8 @@ st_depression = process_array(data['oldpeak'])
 """
 processed_data = process_whole_array(data)
 
-feature_names = ['age','gender','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak']
-label_names = ['num']
+feature_names = ['age','gender','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','num']
+label_names = ['cp']
 
 data_features = processed_data[feature_names]
 data_labels = processed_data['num']
@@ -52,7 +52,6 @@ data_labels = processed_data['num']
 label_list = []
 for i in data_labels:
 	label_list.append(i)
-	print "AP:", i
 
 from sklearn.decomposition import PCA
 
@@ -60,24 +59,35 @@ pca_2 = PCA(2)
 
 plot_columns = pca_2.fit_transform(processed_data)
 
-#plt.scatter(plot_columns[:,0],plot_columns[:,1])
-
 from sklearn.cross_validation import train_test_split
 
 features_train, features_test, labels_train, labels_test = train_test_split(data_features, label_list, test_size=0.33, random_state=42)
 
-clf = svm.SVC()
+clf = svm.SVC(C=10000)
+"""
+#hyperplane retrieval
+hyp = clf.coef_[0]
+a = -hyp[0] / hyp[1]
+xx = np.linspace(-5,5)
+yy = a * xx - (clf.intercept_[0]) / w[1]
 
-print features_train
-print labels_train
+#parallels to the seperating plane
+margin = 1 / np.sqrt(np.sum(clf.coef_ ** 2))
+yy_down = yy + a * margin
+yy_up = yy - a * margin
+"""
+#print features_train
+#print labels_train
 
 clf.fit(features_train,labels_train)
 
 predictions = clf.predict(features_test)
+print predictions
 
 from sklearn.metrics import accuracy_score
 print "Accuracy Score:", accuracy_score(labels_test, predictions)
 
+plt.scatter(data_features['age'], data_features['chol'],zorder=10,cmap=plt.cm.Paired)
 
 plt.title("Heart Disease")
 
